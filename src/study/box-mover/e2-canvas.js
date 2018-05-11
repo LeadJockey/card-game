@@ -4,43 +4,78 @@
   var c = document.getElementById('container');
   var ctx = c.getContext('2d');
 
-  var W = c.width;
-  var H = c.height;
+  var C_W = c.width;
+  var C_H = c.height;
+  var BOX_W = 50;
+  var BOX_H = 50;
+
+  var MIN_W = 0;
+  var MAX_H = C_H - BOX_H;
+  var SPEED = 10;
 
   var positionX = 0;
   var positionY = 0;
 
-
   var init = function(){
-    ctx.fillStyle = 'red';
     bindEvents();
-    moveTo(positionX,positionY);
+    move(positionX,positionY);
   };
 
   var bindEvents = function(){
+
     window.addEventListener('keydown', function(e){
-      console.log(e.keyCode);
-      if(e.keyCode === 39 && positionX >= 0 && positionX < 450){
-        moveTo(positionX += 10, positionY);
-      }
-      if(e.keyCode === 37 && positionX > 0 && positionX <= 450){
-        moveTo(positionX -= 10, positionY);
-      }
-      if(e.keyCode === 40 && positionY >= 0 && positionY < 450){
-        moveTo(positionX, positionY += 10);
-      }
-      if(e.keyCode === 38 && positionY > 0 && positionY <= 450){
-        moveTo(positionX, positionY -= 10);
-      }
+      var keyCode = e.keyCode;
 
+      toRight(keyCode === 39, move);
+      toLeft(keyCode === 37, move);
+      toUp(keyCode === 38, move);
+      toDown(keyCode === 40, move);
     });
+
   };
 
-  var moveTo = function(x,y){
-    ctx.clearRect(0,0,W,H);
-    ctx.fillRect(x,y,50,50);
-  };
+    function toRight(hasKeyCode,drawFunc){
+      if(!hasKeyCode){
+        return;
+      }
+      var isInRange = positionX >= MIN_W && positionX < MAX_H;
+      if(isInRange){
+        drawFunc(positionX += SPEED, positionY);
+      }
+    }
+    function toLeft(hasKeyCode,drawFunc){
+      if(!hasKeyCode){
+        return;
+      }
+      var isInRange = positionX > MIN_W && positionX <= MAX_H;
+      if(isInRange){
+        drawFunc(positionX -= SPEED, positionY);
+      }
+    }
+    function toUp(hasKeyCode,drawFunc){
+      if(!hasKeyCode){
+        return;
+      }
+      var isInRange = positionY > MIN_W && positionY <= MAX_H;
+      if(isInRange){
+        drawFunc(positionX, positionY -= SPEED);
+      }
+    }
+    function toDown(hasKeyCode,drawFunc){
+      if(!hasKeyCode){
+        return;
+      }
+      var isInRange = positionY >= MIN_W && positionY < MAX_H;
+      if(isInRange){
+        drawFunc(positionX, positionY += SPEED);
+      }
+    }
 
+  var move = function(x,y){
+    x > 250 ? ctx.fillStyle = 'blue':ctx.fillStyle = 'red';
+    ctx.clearRect(0,0,C_W,C_H);
+    ctx.fillRect(x,y,BOX_W,BOX_H);
+  };
 
   init();
 
