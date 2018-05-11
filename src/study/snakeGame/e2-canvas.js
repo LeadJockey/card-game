@@ -11,10 +11,14 @@
 
   var MIN_W = 0;
   var MAX_H = C_H - BOX_H;
-  var SPEED = 10;
+  var SPEED = 50;
 
   var positionX = 0;
   var positionY = 0;
+  var keyDownCount = 0;
+  var hasTarget = false;
+  var hasCrashed = false;
+
 
   var init = function(){
     bindEvents();
@@ -30,9 +34,10 @@
       toLeft(keyCode === 37, move);
       toUp(keyCode === 38, move);
       toDown(keyCode === 40, move);
-    });
 
-  };
+      keyDownCount++;
+      console.log(keyDownCount);
+    });
 
     function toRight(hasKeyCode,drawFunc){
       if(!hasKeyCode){
@@ -70,11 +75,33 @@
         drawFunc(positionX, positionY += SPEED);
       }
     }
+  };
 
   var move = function(x,y){
-    x > 250 ? ctx.fillStyle = 'blue':ctx.fillStyle = 'red';
     ctx.clearRect(0,0,C_W,C_H);
-    ctx.fillRect(x,y,BOX_W,BOX_H);
+    ctx.beginPath();
+    ctx.fillStyle = 'blue';
+    ctx.rect(x,y,BOX_W,BOX_H);
+    ctx.fill();
+
+    if(keyDownCount === 3 ){
+      hasTarget = true;
+    }
+
+    if(hasTarget){
+      ctx.beginPath();
+      ctx.fillStyle = 'red';
+      ctx.rect(200,200,50,50);
+      ctx.fill();
+    }
+
+    hasCrashed = hasTarget && positionX === 200 && positionY === 200;
+    console.log(hasCrashed);
+
+    if(hasCrashed){
+      BOX_W += 50;
+      hasTarget = false;
+    }
   };
 
   init();
