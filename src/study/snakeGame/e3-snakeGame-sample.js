@@ -37,6 +37,7 @@ function drawSquare(x,y,color) {
 function createFood() {
   food.x = foodX[Math.floor(Math.random()*foodX.length)]; // random x position from array
   food.y = foodY[Math.floor(Math.random()*foodY.length)]; // random y position from array
+  console.log(Math.floor(Math.random()*foodX.length));
   // looping through the snake and checking if there is a collision
   for(i = 0; i < snake.length; i++) {
     if(checkCollision(food.x, food.y, snake[i].x, snake[i].y)) {
