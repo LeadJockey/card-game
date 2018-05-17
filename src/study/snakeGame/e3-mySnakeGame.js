@@ -60,7 +60,7 @@
       // moving process
       that.isAbleToMove(direction).moveTo(direction).drawSnake();
       // eating process
-      that.isAbleToEat().createFood().drawFood();
+      that.isAbleToEat().createFood().drawFood().drawScore();
 
     });
 
@@ -91,6 +91,12 @@
     return this;
   };
   SnakeGame.prototype.createFood = function(){
+    // 음식 생성 기준
+    if(!this.opts.isAbleToEat){
+      return this;
+    }
+
+
     var ableToPutXList = this.opts.coordinate.xList.slice();
     var ableToPutYList = this.opts.coordinate.yList.slice();
 
@@ -135,6 +141,10 @@
     }
     return this;
   };
+  SnakeGame.prototype.drawScore = function(){
+    this.opts.score.innerText = this.opts.totalScore;
+    return this;
+  };
 
   // method - checker
   SnakeGame.prototype.isAbleToMove = function(direction){
@@ -154,10 +164,13 @@
   SnakeGame.prototype.isAbleToEat = function(){
     this.opts.isAbleToEat = (this.opts.head.x === this.opts.food.x) && (this.opts.head.y === this.opts.food.y);
     if(this.opts.isAbleToEat){
+      // 점수 증가
+      this.opts.totalScore += this.opts.BONE_SIZE;
       console.log('snake growth level :', this.opts.snakeBones.length);
     }
     return this;
   };
+
 
   // method - engine
   SnakeGame.prototype.moveTo = function(direction){
