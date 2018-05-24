@@ -10,17 +10,14 @@
     ctx:document.getElementById('canvas').getContext('2d'),
     snakeLength:5,
     snakeBones:[],
-    coordinate:{
-      xList:[],
-      yList:[]
-    },
+    coordinates:[],
     direction:'',
     isAbleToMove:false,
     isAbleToEat:false,
     totalScore:0,
     food:{
-      x:100,
-      y:100
+      x:0,
+      y:0
     },
     head:{
       x:0,
@@ -47,71 +44,83 @@
 
   // method - initialize
   SnakeGame.prototype.startGame = function(){
-    var that = this;
-
     // initial process
-    that.createCoordinateSystem().createSnake().drawSnake();
+    this.createCoordinateSystem().createSnake().drawSnake().on();
+  };
 
+  // method - on
+  SnakeGame.prototype.on = function(){
+    var that = this;
     window.addEventListener('keydown', function(evt){
       var direction = KEYCODE_DIRECTION_MAP[evt.keyCode] || '';
-
-      // clear screen
-      that.drawClearScreen();
-      // moving process
-      that.isAbleToMove(direction).moveTo(direction).drawSnake();
-      // eating process
-      that.isAbleToEat().createFood().drawFood().drawScore();
-
+      that.drawClearScreen() // clear screen
+          .isAbleToMove(direction, that.moveTo.bind(that)).drawSnake() // moving process
+          .isAbleToEat(that.createFood.bind(that)).drawFood().drawScore(); // eating process
     });
+  };
 
+  // method - private
+  SnakeGame.prototype._getIndexArray = function(length){
+    var indexArray = [];
+    for(var i=0; i < length; i++){
+      indexArray.push(i);
+    }
+    return indexArray;
+  };
+  SnakeGame.prototype._mapToList = function(map){
+    return map.map(function(obj){
+      var result = '';
+      for(var prop in obj){
+        if(obj.hasOwnProperty(prop)){
+          result += prop.toUpperCase() + obj[prop];
+        }
+      }
+      return result;
+    });
   };
 
   // method - create
   SnakeGame.prototype.createSnake = function(){
     console.log('Snake : creating . . . ');
-    this.opts.snakeBones = [];
-    for(var i = this.opts.snakeLength; i > 0; i--){
-      this.opts.snakeBones.push({
-        x:i * this.opts.BONE_SIZE,
-        y:0
-      });
-    }
-    console.log('done', this.opts.snakeBones);
+
+    var that = this;
+
+    that.opts.snakeBones = [];
+    that._getIndexArray(that.opts.snakeLength).forEach(function(i){
+      that.opts.snakeBones.push({ x:i * that.opts.BONE_SIZE, y:0 });
+    });
+
+    console.log('done', that.opts.snakeBones);
     return this;
   };
   SnakeGame.prototype.createCoordinateSystem = function(){
     console.log('CoordinateSystem : creating . . . ');
-    var scale = this.opts.BONE_SIZE;
-    var range = this.opts.canvas.width - scale;
+
+    var that = this;
+    var scale = that.opts.BONE_SIZE;
+    var range = that.opts.canvas.width - scale;
+    var xList = [];
+    var yList = [];
+
     for(var i = 0; i <= range; i += scale){
-      this.opts.coordinate.xList.push(i);
-      this.opts.coordinate.yList.push(i);
+      xList.push(i);
+      yList.push(i);
     }
-    console.log('done', this.opts.coordinate);
+
+    xList.forEach(function(x){
+      yList.forEach(function(y){
+        that.opts.coordinates.push('X' + x + 'Y' + y);
+      })
+    });
+
+    console.log('done', that.opts.coordinates);
     return this;
   };
   SnakeGame.prototype.createFood = function(){
-    // 음식 생성 기준
-    if(!this.opts.isAbleToEat){
-      return this;
-    }
+    var ableToCreateFoodList = this._mapToList(this.opts.snakeBones);
+    var randomIdx = Math.floor(Math.random() * ableToCreateFoodList.length);
 
-
-    var ableToPutXList = this.opts.coordinate.xList.slice();
-    var ableToPutYList = this.opts.coordinate.yList.slice();
-
-    // 전체 좌표계에서 스네이크의 좌표값 빼기
-    this.opts.snakeBones.forEach(function(bone){
-      ableToPutXList = ableToPutXList.filter(function(x){return x !== bone.x;});
-      ableToPutYList = ableToPutYList.filter(function(y){return y !== bone.y;});
-    });
-
-    // 리스트에서 랜덤으로 하나를 뽑아 반환
-    var randomFoodX = Math.floor(Math.random() * ableToPutXList.length);
-    var randomFoodY = Math.floor(Math.random() * ableToPutYList.length);
-
-    this.opts.food = { x:ableToPutXList[randomFoodX], y:ableToPutYList[randomFoodY] };
-
+    this.opts.food = ableToCreateFoodList[randomIdx];
     return this;
   };
 
@@ -120,6 +129,7 @@
     var C_W = this.opts.canvas.width;
     var C_H = this.opts.canvas.height;
     this.opts.ctx.clearRect(0, 0, C_W, C_H);
+    return this;
   };
   SnakeGame.prototype.drawSquare = function(x, y, size, color){
     this.opts.ctx.fillStyle = color;
@@ -136,9 +146,11 @@
     return this;
   };
   SnakeGame.prototype.drawFood = function(){
-    if(!this.opts.isAbleToEat){
-      this.drawSquare(this.opts.food.x, this.opts.food.y, this.opts.BONE_SIZE, this.opts.FOOD_COLOR);
+    if(this.opts.isAbleToEat){
+      return this;
     }
+    console.log('food xy : ', this.opts.food.x + ':' + this.opts.food.y);
+    this.drawSquare(this.opts.food.x, this.opts.food.y, this.opts.BONE_SIZE, this.opts.FOOD_COLOR);
     return this;
   };
   SnakeGame.prototype.drawScore = function(){
@@ -147,7 +159,7 @@
   };
 
   // method - checker
-  SnakeGame.prototype.isAbleToMove = function(direction){
+  SnakeGame.prototype.isAbleToMove = function(direction, moveToFunc){
     var reverseDirection = REVERSE_DIRECTION_MAP[direction] || '';
 
     if(this.opts.direction === reverseDirection){
@@ -159,18 +171,22 @@
       this.opts.isAbleToMove = true;
     }
 
+    moveToFunc(direction);
+
     return this;
   };
-  SnakeGame.prototype.isAbleToEat = function(){
+  SnakeGame.prototype.isAbleToEat = function(createFoodFunc){
     this.opts.isAbleToEat = (this.opts.head.x === this.opts.food.x) && (this.opts.head.y === this.opts.food.y);
     if(this.opts.isAbleToEat){
+      // 음식생성
+      createFoodFunc();
       // 점수 증가
       this.opts.totalScore += this.opts.BONE_SIZE;
-      console.log('snake growth level :', this.opts.snakeBones.length);
+      console.log('snake growth level :', this.opts.snakeBones.length + 1);
     }
+
     return this;
   };
-
 
   // method - engine
   SnakeGame.prototype.moveTo = function(direction){
@@ -205,7 +221,6 @@
     if(!this.opts.isAbleToEat){
       this.opts.snakeBones.pop();
     }
-
     return this;
   };
 
