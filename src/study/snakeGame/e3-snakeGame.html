@@ -8,17 +8,16 @@
             margin:0;
             padding:0;
         }
-        /*html{*/
-            /*height:100%;*/
-        /*}*/
-        /*body{*/
-            /*background:-webkit-linear-gradient(top, #7fc5c9, #deabbe);*/
-            /*text-align:center;*/
-        /*}*/
         .score{
             text-align:center;
             font-size:2em;
             position:relative;
+        }
+        .wrap_btns{
+            overflow:hidden;
+            width:500px;
+            margin:0 auto;
+            list-style:none;
         }
         body{
             background-color:gray;
@@ -33,12 +32,31 @@
             right:0;
             left:0;
         }
+
+        button{
+            float:left;
+            width:50%;
+            height:50px;
+            text-align:center;
+            line-height:50px;
+            box-sizing:border-box;
+            background-color:white;
+            border:2px solid black;
+        }
+        button:active{
+            background-color:black;
+            color:white;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="score" id="score">0</div>
-    <canvas id="canvas" height="200px" width="200px"></canvas>
+    <div class="wrap_btns">
+        <button id="startBtn">START</button>
+        <button id="aiBtn">AI</button>
+    </div>
+    <canvas id="canvas" height="500px" width="500px"></canvas>
     <script type="text/javascript" src="ex3_v2_mySnakeGame.js"></script>
 </body>
 </html>
