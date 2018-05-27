@@ -2,6 +2,7 @@
 var Pipeline = function(presetStages){
   this.stages = presetStages || [];
 };
+
 Pipeline.prototype.pipe = function(next){
   this.stages.push(next);
   return this;
@@ -16,6 +17,9 @@ Pipeline.prototype.process = function(data){
 
 (function($, Pipeline){
   'use strict';
+  //test
+  var tick = 0;
+
 
   // elem
   var canvas = document.getElementById('canvas');
@@ -31,14 +35,14 @@ Pipeline.prototype.process = function(data){
     foodColor:'#97E4FF',
     snakes:['X100|Y20', 'X80|Y20', 'X60|Y20', 'X40|Y20', 'X20|Y20'],
     snakesQueue:['X100|Y20', 'X80|Y20', 'X60|Y20', 'X40|Y20', 'X20|Y20'],
-    headings:[],
     locations:[], // X10|Y10
-    searches:[], // X10|Y10|S1
-    direction:'right',
+    direction:'',
+    directionQueue:'right',
     score:0,
     food:'X100|Y100',
     head:'X100|Y20',
-    tail:'X20|Y20'
+    tail:'X20|Y20',
+    isCrash:false
   };
   // map
   var keyMap = {
@@ -47,9 +51,16 @@ Pipeline.prototype.process = function(data){
     39:'right',
     40:'down'
   };
+  var reverseDirectionMap = {
+    'right':'left',
+    'left':'right',
+    'up':'down',
+    'down':'up'
+  };
 
   var ai = {
-    directions:['left', 'right', 'down', 'up'],
+    isAi:false,
+    directions:['right', 'down', 'up'],
     movement:function(){}
   };
   var user = {
@@ -67,13 +78,11 @@ Pipeline.prototype.process = function(data){
       clearScreen(),
       drawSnake(),
       drawFood(),
-      drawScore(),
-      drawSearchingHelper()
+      drawScore()
     );
 
     // State initialize processing
     createProcess.pipe(createLocation)
-                 .pipe(createHeadings)
                  .pipe(createFood)
                  .pipe(setState);
     createProcess.process(state);
@@ -84,14 +93,13 @@ Pipeline.prototype.process = function(data){
 
   // events
   function bindEvents(){
+
     window.addEventListener('keydown', function(event){
       var direction = keyMap[event.keyCode] || '';
-      // if(state.direction !== direction && direction !== ''){
-      //   clearInterval(user.movement);
-      //   user.movement = setInterval(frame(direction), state.fps);
-      // }
-      console.log(state.headings);
-      frame(direction)();
+      if(state.direction !== direction && direction !== ''){
+        clearInterval(user.movement);
+        user.movement = setInterval(frame(direction), state.fps);
+      }
     });
 
     startBtn.addEventListener('click', function(){
@@ -99,30 +107,11 @@ Pipeline.prototype.process = function(data){
     });
 
     aiBtn.addEventListener('click', function(){
-      console.log('dir', Math.floor(Math.random() * ai.directions.length));
-      ai.movement = setInterval(frame(function(){
-        var random = Math.floor(Math.random() * ai.directions.length);
+      var flag = ai.isAi;
+      ai.isAi = !flag;
+      ai.movement = setInterval(frame(ai.directions[Math.floor(Math.random() * ai.directions.length)]), state.fps);
+    });
 
-        frame(ai.directions[random]);
-      }), state.fps);
-    })
-
-
-    // ai test
-    // ai.movement = setInterval(function(){
-    //   var headingLocations = difference(state.locations, state.snakes);
-    //   var randomIdx = Math.floor(Math.random() * headingLocations.length);
-    //
-    //   var direction = ai.directions[Math.floor(Math.random() * ai.directions.length)];
-    //   var updateProcess = new Pipeline();
-    //   var preset = { direction:direction };
-    //
-    //     updateProcess.pipe(onMove)
-    //                  .pipe(onDinner)
-    //                  .pipe(onCrash)
-    //                  .pipe(setState);
-    //     updateProcess.process($.extend(state, preset));
-    // }, state.fps);
   }
 
   //process
@@ -173,12 +162,6 @@ Pipeline.prototype.process = function(data){
     result.tail = newTail;
     result.snakes = newSnakes;
     result.sankesQueue = snakesQueue;
-    // result.headingOptions = [
-    //   parseIntToLocation(headX+size, headY),
-    //   parseIntToLocation(headX, headY+size),
-    //   parseIntToLocation(headX-size, headY),
-    //   parseIntToLocation(headX, headY+size)
-    // ];
 
     return result;
   }
@@ -192,14 +175,60 @@ Pipeline.prototype.process = function(data){
     var isCrashSelf = (snakes.length - tmpHeads.length) !== difference(snakes, tmpHeads).length;
 
     if(isOutOfRange || isCrashSelf){
+      result.isCrash = true;
       result.snakes = result.snakesQueue;
       result.head = result.snakesQueue[0];
       result.tail = result.snakesQueue[result.snakesQueue.length - 1];
-      console.log('GAME OVER');
+      console.log('CRASHED : GAME OVER');
       clearInterval(user.movement);
-      clearInterval(ai.movement);
     }else{
       result.snakesQueue = result.snakes;
+      result.isCrash = false;
+    }
+
+    if(ai.isAi){
+      var nextDirections = [];
+      var size = result.objSize;
+
+      var right = parseIntToLocation(parseLocationToInt(result.head, 'X') + size, parseLocationToInt(result.head, 'Y'));
+      var left = parseIntToLocation(parseLocationToInt(result.head, 'X') - size, parseLocationToInt(result.head, 'Y'));
+      var down = parseIntToLocation(parseLocationToInt(result.head, 'X'), parseLocationToInt(result.head, 'Y') + size);
+      var up = parseIntToLocation(parseLocationToInt(result.head, 'X'), parseLocationToInt(result.head, 'Y') - size);
+      console.log(search(result.snakes, right));
+
+      if(!search(result.snakes, right)
+        && (parseLocationToInt(result.head, 'X') + size) <= (canvas.width - size)
+        && (parseLocationToInt(result.food,'X') >= ((parseLocationToInt(result.head, 'X') + size)))
+      ){
+        nextDirections.push('right');
+      }else if(!search(result.snakes, left)
+        && (parseLocationToInt(result.head, 'X') - size) >= 0
+        && (parseLocationToInt(result.food,'X') <= ((parseLocationToInt(result.head, 'X') - size)))
+      ){
+        nextDirections.push('left');
+      }else if(!search(result.snakes, down)
+        && (parseLocationToInt(result.head, 'Y') + size) <= (canvas.height + size)
+        && (parseLocationToInt(result.food, 'Y') >= ((parseLocationToInt(result.head, 'Y') + size)))
+      ){
+        nextDirections.push('down');
+      }else if(!search(result.snakes, up)
+        && (parseLocationToInt(result.head, 'Y') - size) >= 0
+        && (parseLocationToInt(result.food, 'Y') <= ((parseLocationToInt(result.head, 'Y') - size)))
+      ){
+        nextDirections.push('up');
+      }else if(!(isOutOfRange || isCrashSelf)){
+        nextDirections = [result.direction];
+      }
+
+      clearInterval(ai.movement);
+      ai.directions = difference(nextDirections, [reverseDirectionMap[result.direction]]);
+      ai.movement = setInterval(frame(ai.directions[Math.floor(Math.random() * ai.directions.length)]), result.fps);
+      if(result.isCrash){
+        clearInterval(ai.movement);
+      }
+      // if(tick > 500){
+      //   clearInterval(ai.movement);
+      // }
     }
 
     return result;
@@ -209,14 +238,18 @@ Pipeline.prototype.process = function(data){
   function frame(direction){
     return function(){
       var updateProcess = new Pipeline();
-      var preset = { direction:direction };
+      var preset = {
+        directionQueue:state.direction,
+        direction:direction
+      };
       if(direction !== ''){
         updateProcess.pipe(onMove)
-                     .pipe(createHeadings)
                      .pipe(onDinner)
                      .pipe(onCrash)
                      .pipe(setState);
         updateProcess.process($.extend(state, preset));
+        tick++;
+        console.log(tick);
       }
     };
   }
@@ -245,64 +278,6 @@ Pipeline.prototype.process = function(data){
     var randomIdx = Math.floor(Math.random() * foodLocations.length);
 
     result.food = foodLocations[randomIdx];
-    return result;
-  }
-
-  function createSearchingHelper(stateObj){
-    console.log('creating searching helper ... ');
-    var result = $.extend({}, stateObj);
-
-    return result;
-  }
-
-  function createHeadings(stateObj){
-    console.log('creating headings ... ');
-    var result = $.extend({}, stateObj);
-    var head = result.head;
-    var size = result.objSize;
-    var rangeW = canvas.width - size;
-    var rangeY = canvas.height - size;
-    var headX = parseLocationToInt(head, 'X');
-    var headY = parseLocationToInt(head, 'Y');
-    var positiveX = headX + size;
-    var negativeX = headX - size;
-    var positiveY = headY + size;
-    var negativeY = headY - size;
-    var headingOptions = [
-      // parseIntToSearchHelper(positiveX, headY, 1), //right square
-      // parseIntToSearchHelper(negativeX, headY, 1), //left square
-      // parseIntToSearchHelper(headX, positiveY, 1), //up square
-      // parseIntToSearchHelper(headX, negativeY, 1)  //down square
-    ];
-
-    function getRightOrder(){
-      var headingOptions = [];
-      var lv = 1;
-      for(var right = headX+size; right <= rangeW; right+=size){
-        headingOptions.push(parseIntToSearchHelper(right, headY, lv++));
-      }
-      return headingOptions;
-    }
-    function getLeftOrder(){
-      var headingOptions = [];
-      var lv = 1;
-      for(var left = headX-size; left >= size; left-=size){
-        headingOptions.push(parseIntToSearchHelper(left, headY, lv++));
-      }
-      return headingOptions;
-    }
-
-    // for(var left = headX-size; right >= 0; right-=size){
-    //   headingOptions.push(parseIntToSearchHelper(right, headY, (rangeW-right)/size))
-    // }
-
-
-
-    result.headings = headingOptions.concat(
-      getRightOrder(),
-      getLeftOrder()
-    );
-
     return result;
   }
 
@@ -341,27 +316,6 @@ Pipeline.prototype.process = function(data){
     return 'X' + x + '|Y' + y;
   }
 
-  function parseSearchHelperToInt(searchHelper, type){
-    // search format == ex) X10|Y10|S10
-    var searchParts = searchHelper.split('|');
-    if(type === 'X'){
-      var xString = searchParts[0];
-      return parseInt(xString.replace(type, ''), 10);
-    }
-    if(type === 'Y'){
-      var yString = searchParts[1];
-      return parseInt(yString.replace(type, ''), 10);
-    }
-    if(type === 'S'){
-      var sString = searchParts[2];
-      return parseInt(sString.replace(type, ''), 10);
-    }
-  }
-
-  function parseIntToSearchHelper(x, y, s){
-    return 'X' + x + '|Y' + y + '|S' + s;
-  }
-
   function copyArray(array){
     return Array.prototype.slice.call(array);
   }
@@ -372,6 +326,19 @@ Pipeline.prototype.process = function(data){
     return b.filter(function(value){
       return c.indexOf(value) < 0;
     });
+  }
+
+  function search(array, target){
+    var arr = copyArray(array);
+    var length = arr.length;
+    var result = false;
+    for(var v=0; v <length; v++){
+      if(arr[v].indexOf(target) > -1){
+        result = true;
+        break;
+      }
+    }
+    return result;
   }
 
   // draw
@@ -414,21 +381,6 @@ Pipeline.prototype.process = function(data){
   function drawScore(){
     return function(){
       score.innerText = state.score;
-    }
-  }
-
-  function drawSearchingHelper(){
-    return function(){
-      state.headings.forEach(function(headAround){
-        drawSquare(
-          parseSearchHelperToInt(headAround, 'X'),
-          parseSearchHelperToInt(headAround, 'Y'),
-          state.objSize,
-          '#EFEFEF',
-          parseSearchHelperToInt(headAround, 'S').toString()
-        )();
-
-      });
     }
   }
 
