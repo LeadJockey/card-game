@@ -33,7 +33,7 @@ Pipeline.prototype.process = function(data){
     fps:100,
     snakeColor:'#DB3079',
     foodColor:'#97E4FF',
-    snakes:['X100|Y20', 'X80|Y20', 'X60|Y20', 'X40|Y20', 'X20|Y20'],
+    snakes:['X100|Y20', 'X80|Y20', 'X60|Y20', 'X40|Y20|L1|O1', 'X20|Y20'],
     snakesQueue:['X100|Y20', 'X80|Y20', 'X60|Y20', 'X40|Y20', 'X20|Y20'],
     locations:[], // X10|Y10
     direction:'',
