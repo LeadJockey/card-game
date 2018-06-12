@@ -65,52 +65,50 @@
   //elem
   const canvas = document.getElementById('canvas');
   const ctx = canvas.getContext('2d');
-  const size = canvas.width / 10; // 50
+  const size = canvas.width / 25; // 50
+  let directionQueue = 'up';
 
   const presetState = {
+    fps:100,
     map:[],
     snakes:[],
-    food:{}
+    food:{},
+    snakePool:{
+      shawn:{
+        body:[33, 34, 35, 36, 37],
+        directionQueue:'up',
+        movement:function(){}
+      },
+      ai_jarvis:{
+        body:[586, 585, 584, 583, 582],
+        directionQueue:'down',
+        movement:function(){}
+      }
+    }
   };
   const snakeGame = new _.Structure(presetState);
   const _state = snakeGame.state;
-  const snakePool = {
-    user:[13, 14, 15, 16, 17],
-    ai:[86, 85, 84, 83, 82],
-  };
 
-  //init
-  //initialize pipeline process(state)
   init();
-  // on Events - rending UI
-  // key Event
-  // grow Event
-  // move Event
-  // crash Event
-  // trig Events - event trigger
-  // key Event
-  // grow Event
-  // move Event
-  // crash Event
 
   function init(){
     const initialize = new _.Pipeline();
     initialize.pipe(createMap)
-              .pipe(createSnake('user','yellow'))
-              .pipe(createSnake('ai','green'))
-              .pipe(createFood('pink'))
+              .pipe(createSnake('shawn', 'red'))
+              .pipe(createSnake('ai_jarvis', 'blue'))
+              .pipe(createFood('green'))
               .pipe(drawInitialSnake)
               .pipe(drawInitialFood)
               .process(_state);
-    console.log(snakeGame);
-    console.log(snakePool);
+    snakeGame.renderedBy('update-move')(
+      drawClearScreen,
+      drawFood,
+      drawSnake('shawn'),
+      drawSnake('ai_jarvis')
+    );
+    moveByUser('shawn');
+    moveByAI('ai_jarvis');
   }
-  snakeGame.renderedBy('update-move')(
-    drawSnake('user'),
-    drawSnake('ai')
-  );
-  moveBy('user');
-  moveBy('ai');
 
   function createMap(state){
     const map = [];
@@ -132,21 +130,24 @@
     console.log('created map');
     return state;
   }
-  function createSnake(id,color){
+
+  function createSnake(id, color){
     return function(state){
       const snake = [];
-      snakePool[id].forEach((index) =>{
+      _state.snakePool[id].body.forEach((index) =>{
         const eachSnakePart = _state.map[index];
         eachSnakePart.hasObject = true;
         eachSnakePart.isAbleToMove = false;
         eachSnakePart.color = color || '#000';
         state.snakes.push(eachSnakePart);
         snake.push(eachSnakePart);
-        snakePool[id] = snake;
+        _state.snakePool[id].body = snake;
       });
+      console.log('created snake ' + id);
       return state;
     }
   }
+
   function createFood(color){
     return function(state){
       const emptySpots = _state.map.filter(spot => !spot.hasObject);
@@ -156,77 +157,221 @@
       food.isAbleToMove = true;
       food.color = color || '#000';
       state.food = food;
+      console.log('created food');
       return state;
     }
+  }
+
+  function getSnakes(){
+    const newSnakes = [];
+    for(let snakeId in _state.snakePool){
+      if(_state.snakePool.hasOwnProperty(snakeId)){
+        _state.snakePool[snakeId].body.forEach(e => newSnakes.push(e));
+      }
+    }
+    return newSnakes;
+  }
+
+  function findNear(id){
+    const head = _state.snakePool[id].body[0];
+    const moveAbleList = [];
+    let up = null;
+    let down = null;
+    let left = null;
+    let right = null;
+    _state.map.forEach((spot) =>{
+      //up
+      if((spot.x === head.x) && (spot.y === head.y - size)){
+        up = spot;
+        if(spot.isAbleToMove){
+          moveAbleList.push(spot);
+        }
+      }
+      //down
+      if((spot.x === head.x) && (spot.y === head.y + size)){
+        down = spot;
+        if(spot.isAbleToMove){
+          moveAbleList.push(spot);
+        }
+      }
+      //left
+      if((spot.y === head.y) && (spot.x === head.x - size)){
+        left = spot;
+        if(spot.isAbleToMove){
+          moveAbleList.push(spot);
+        }
+      }
+      //right
+      if((spot.y === head.y) && (spot.x === head.x + size)){
+        right = spot;
+        if(spot.isAbleToMove){
+          moveAbleList.push(spot);
+        }
+      }
+    });
+
+    return {
+      up,
+      down,
+      left,
+      right,
+      head,
+      moveAbleList
+    };
+  }
+
+  function directionHelper(headObj, food, id){
+    const head = headObj.head;
+    let newHead = {};
+    // console.log(headObj);
+
+    //to right
+    if(head.x > food.x){
+      if(!!headObj['left']){
+        console.log(`left hx ${head.x}:fx ${food.x}`);
+        newHead = headObj['left'];
+      }
+    }
+    //to left
+    if(head.x < food.x){
+      if(!!headObj['right']){
+        console.log(`right hx ${head.x}:fx ${food.x}`);
+        newHead = headObj['right'];
+      }
+    }
+    //to up
+    if(head.y > food.y){
+      if(!!headObj['up']){
+        console.log(`up hx ${head.x}:fx ${food.x}`);
+        newHead = headObj['up'];
+      }
+    }
+    //to down
+    if(head.y < food.y){
+      if(!!headObj['down']){
+        console.log(`down hx ${head.x}:fx ${food.x}`);
+        newHead = headObj['down'];
+      }
+    }
+    if(`X${head.x}Y${head.y}` === `X${food.x}Y${food.y}`){
+      console.log('head eat food');
+      const moveAbleList = headObj.moveAbleList;
+      const randomIdx = Math.floor(Math.random() * moveAbleList.length);
+      newHead = moveAbleList[randomIdx];
+    }
+
+    if(!newHead.isAbleToMove){
+      console.log(headObj);
+      const moveAbleList = findNear(id).moveAbleList;
+      const randomIdx = Math.floor(Math.random() * moveAbleList.length);
+      newHead = moveAbleList[randomIdx];
+    }
+
+    return newHead;
   }
 
   function drawSquare(spot, size, color){
     ctx.fillStyle = color || spot.color || '#000';
     ctx.fillRect(spot.x, spot.y, size, size);
   }
+
   function drawInitialSnake(state){
-    state.snakes.forEach(eachSnakePart =>drawSquare(eachSnakePart,size));
+    state.snakes.forEach(eachSnakePart => drawSquare(eachSnakePart, size));
     return state;
   }
+
   function drawInitialFood(state){
-    drawSquare(state.food,size);
+    drawSquare(state.food, size);
     return state;
   }
+
+  function drawClearScreen(){
+    drawSquare({
+      x:0,
+      y:0
+    }, canvas.width, '#fff');
+  }
+
   function drawSnake(id){
     return function(){
-      snakePool[id].forEach(eachSnakePart =>drawSquare(eachSnakePart,size));
+      _state.snakePool[id].body.forEach(eachSnakePart => drawSquare(eachSnakePart, size));
     }
   }
+
   function drawFood(){
-    drawSquare(_state.food,size);
+    drawSquare(_state.food, size);
   }
 
-  function moveBy(id){
+  function moveByUser(id){
     window.addEventListener('keydown', function(event){
       const direction = directionKeyMap[event.keyCode] || '';
-      if(direction !== ''){
-        const newHead = findNear(id)[direction];
+      _state.snakePool[id].directionQueue = direction;
+    });
+    _state.snakePool[id].mevement = setInterval(function(){
+      if(directionQueue !== ''){
+        const newHead = findNear(id)[ _state.snakePool[id].directionQueue];
+        const targetSnake = _state.snakePool[id].body;
+        const newTail = targetSnake[targetSnake.length - 1];
+
+        // 충돌감지
+        if(newHead && (newHead.isAbleToMove || !newHead.hasObject)){
+          newHead.hasObject = true;
+          newHead.isAbleToMove = false;
+          newHead.color = _state.snakePool[id].body[0].color;
+        }else{
+          clearInterval(_state.snakePool[id].mevement);
+          console.log('GAME OVER');
+          return;
+        }
+
+        // 음식과 부딛혔을경우
+        if(`X${newHead.x}Y${newHead.y}` === `X${_state.food.x}Y${_state.food.y}`){
+          snakeGame.setState('update-eat', createFood('green')(_state));
+        }else{
+          newTail.hasObject = false;
+          newTail.isAbleToMove = true;
+          newTail.color = '#fff';
+          targetSnake.pop();
+        }
+
+        // 이동
+        targetSnake.unshift(newHead);
+        snakeGame.setState('update-move', { snakes:getSnakes() });
+      }
+    }, _state.fps);
+  }
+
+  function moveByAI(id){
+    _state.snakePool[id].movement = setInterval(function(){
+      const newHead = directionHelper(findNear(id), _state.food, id);
+      const targetSnake = _state.snakePool[id].body;
+      const newTail = targetSnake[targetSnake.length - 1];
+
+      // 충돌감지
+      if(newHead && (newHead.isAbleToMove || !newHead.hasObject)){
         newHead.hasObject = true;
         newHead.isAbleToMove = false;
-        newHead.color = snakePool[id][0].color;
-        snakePool[id].unshift(newHead);
-        console.log(snakePool);
-        snakeGame.setState('update-move',{});
+        newHead.color = _state.snakePool[id].body[0].color;
+      }else{
+        clearInterval(_state.snakePool[id].movement);
+        console.log('GAME OVER');
+        return;
       }
-    });
+
+      // 음식과 부딛혔을경우
+      if(`X${newHead.x}Y${newHead.y}` === `X${_state.food.x}Y${_state.food.y}`){
+        snakeGame.setState('update-eat', createFood('green')(_state));
+      }else{
+        newTail.hasObject = false;
+        newTail.isAbleToMove = true;
+        newTail.color = '#fff';
+        targetSnake.pop();
+      }
+
+      // 이동
+      targetSnake.unshift(newHead);
+      snakeGame.setState('update-move', { snakes:getSnakes() });
+    }, _state.fps);
   }
-
-  function findNear(id){
-    const head = snakePool[id][0];
-    let up = null;
-    let down = null;
-    let left = null;
-    let right = null;
-
-    _state.map.forEach((spot)=>{
-      //up
-      if((spot.x === head.x) && (spot.y === head.y - size)){
-        up = spot;
-      }
-      //down
-      if((spot.x === head.x) && (spot.y === head.y + size)){
-        down = spot;
-      }
-      //left
-      if((spot.y === head.y) && (spot.x === head.x - size)){
-        left = spot;
-      }
-      //right
-      if((spot.y === head.y) && (spot.x === head.x + size)){
-        right = spot;
-      }
-    });
-
-    return { up,down,left,right };
-  }
-
-
-
-
 
 })(window.M);
