@@ -69,7 +69,7 @@
   let directionQueue = 'up';
 
   const presetState = {
-    fps:100,
+    fps:10,
     map:[],
     snakes:[],
     food:{},
@@ -80,7 +80,7 @@
         movement:function(){}
       },
       ai_jarvis:{
-        body:[586, 585, 584, 583, 582],
+        body:[56, 55, 54, 53, 52],
         directionQueue:'down',
         movement:function(){}
       }
@@ -106,8 +106,9 @@
       drawSnake('shawn'),
       drawSnake('ai_jarvis')
     );
-    moveByUser('shawn');
+    // moveByUser('shawn');
     moveByAI('ai_jarvis');
+    moveByAI('shawn');
   }
 
   function createMap(state){
@@ -223,45 +224,38 @@
   function directionHelper(headObj, food, id){
     const head = headObj.head;
     let newHead = {};
-    // console.log(headObj);
 
     //to right
     if(head.x > food.x){
       if(!!headObj['left']){
-        console.log(`left hx ${head.x}:fx ${food.x}`);
         newHead = headObj['left'];
       }
     }
     //to left
     if(head.x < food.x){
       if(!!headObj['right']){
-        console.log(`right hx ${head.x}:fx ${food.x}`);
         newHead = headObj['right'];
       }
     }
     //to up
     if(head.y > food.y){
       if(!!headObj['up']){
-        console.log(`up hx ${head.x}:fx ${food.x}`);
         newHead = headObj['up'];
       }
     }
     //to down
     if(head.y < food.y){
       if(!!headObj['down']){
-        console.log(`down hx ${head.x}:fx ${food.x}`);
         newHead = headObj['down'];
       }
     }
     if(`X${head.x}Y${head.y}` === `X${food.x}Y${food.y}`){
-      console.log('head eat food');
       const moveAbleList = headObj.moveAbleList;
       const randomIdx = Math.floor(Math.random() * moveAbleList.length);
       newHead = moveAbleList[randomIdx];
     }
 
     if(!newHead.isAbleToMove){
-      console.log(headObj);
       const moveAbleList = findNear(id).moveAbleList;
       const randomIdx = Math.floor(Math.random() * moveAbleList.length);
       newHead = moveAbleList[randomIdx];
@@ -320,7 +314,7 @@
           newHead.color = _state.snakePool[id].body[0].color;
         }else{
           clearInterval(_state.snakePool[id].mevement);
-          console.log('GAME OVER');
+          console.log(id+' GAME OVER');
           return;
         }
 
@@ -354,7 +348,7 @@
         newHead.color = _state.snakePool[id].body[0].color;
       }else{
         clearInterval(_state.snakePool[id].movement);
-        console.log('GAME OVER');
+        console.log(id+'GAME OVER');
         return;
       }
 
