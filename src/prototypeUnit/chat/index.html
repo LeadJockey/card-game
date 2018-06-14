@@ -10,11 +10,15 @@
         .chat_wrap .area_game{float:left}
         .chat_wrap .game_canvas{background-color:#fff}
         .chat_wrap .area_chat{position:absolute; top:0;bottom:0;right:0;left:500px;background-color:rgba(57, 145, 254, 0.95)}
-        .chat_wrap .list_chat{height:450px;padding:10px}
+        .chat_wrap .scroll_chat{overflow:scroll;height:450px;padding:10px}
+        .chat_wrap .list_chat{}
         .chat_wrap .list_chat li{margin-bottom:10px;}
         .chat_wrap .list_chat .txt_msg{padding:2px 5px;background-color:yellow;border-radius:7px}
         .chat_wrap .insert_chat{height:24px;padding:3px;background-color:#ccc}
-        .chat_wrap .insert_chat input{display:inline-block;width:80%;height:89%}
+        .chat_wrap .insert_chat input{display:inline-block;height:89%}
+        .chat_wrap .insert_chat input + input{margin-right:10px}
+        .chat_wrap .insert_chat #userName{width:30%}
+        .chat_wrap .insert_chat #userMsg{width:50%}
     </style>
 </head>
 <body>
@@ -23,41 +27,23 @@
         <canvas id="canvas" class="game_canvas" width="500px" height="500px"></canvas>
     </div>
     <div class="area_chat">
-        <ul class="list_chat">
-            <li><span class="txt_msg">글을 입력해 주세요</span></li>
-        </ul>
+        <div class="scroll_chat" style="">
+            <ul class="list_chat">
+                <li><span class="txt_msg">글을 입력해 주세요</span></li>
+            </ul>
+        </div>
         <div class="insert_chat">
-            <form action="">
+            <form action="" >
+                <input id="userName" placeholder="무작위 슈퍼히어">
                 <input id="userMsg" autocomplete="off" />
-                <button id="submit">Send</button>
+                <button id="submit">SEND</button>
             </form>
         </div>
     </div>
 </div>
 <script src="/socket.io/socket.io.js"></script>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-<script>
-  (function ($) {
-    'use strict';
-    console.log('initialized broadcast chat server!');
-
-    const $input = $('#userMsg');
-    const $list = $('.list_chat');
-    const $form = $('form');
-
-    const socket = io();
-    $form.submit(function(){
-      socket.emit('to-server-msg', $input.val());
-      $input.val('');
-      return false;
-    });
-
-    socket.on('to-client-msg', function(msg){
-      $list.append($('<li>').append($('<span>').addClass('txt_msg').text(msg)));
-    });
-  })(jQuery);
-</script>
-<!--<script type="text/javascript" src=/js/module/shawnPattern.js"></script>-->
-<!--<script src="/js/snakeGame/e3_v4_mySnakeGame.js"></script>-->
+<script src="js/chat/client_chat.js"></script>
+<script src="/js/module/shawnPattern.js"></script>
+<script src="/js/snakeGame/e3_v4_mySnakeGame.js"></script>
 </body>
 </html>

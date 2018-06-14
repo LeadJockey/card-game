@@ -12,14 +12,15 @@ app.set('port', 3000);
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended:true }));
-app.use( express.static( path.join( __dirname, '..', '..' ) ) );
-app.use( '/js', express.static( path.join( __dirname, 'public' ) ) );
+// app.use( express.static( path.join( __dirname, '..', '..' ) ) );
+console.log(path.join(__dirname, '..', 'module'));
+app.use('/js', express.static(path.join(__dirname, '..', '..', 'prototypeUnit')));
 
 // server
 server.listen(app.get('port'), () =>{console.log(`server listening on port ${app.get('port')}`);});
 
 // socket
-app.get('/', (req, res)=>{res.sendFile(__dirname + '/index.html');});
+app.get('/', (req, res) =>{res.sendFile(__dirname + '/index.html');});
 
 io.on('connection', function(socket){
   console.log('a user connected');
