@@ -5,6 +5,15 @@ const io = require('socket.io')(server);
 const morgan = require('morgan');
 const path = require('path');
 
+const msgContainer = [];
+function getBeforeMsg(){
+  let str = ``;
+  msgContainer.forEach((msg)=>{
+    str+=`<li><span class="txt_msg">${msg}</span></li>`;
+  });
+  return str;
+}
+
 // set
 app.set('port', 3000);
 
@@ -20,14 +29,21 @@ app.use('/js', express.static(path.join(__dirname, '..', '..', 'prototypeUnit'))
 server.listen(app.get('port'), () =>{console.log(`server listening on port ${app.get('port')}`);});
 
 // socket
-app.get('/', (req, res) =>{res.sendFile(__dirname + '/index.html');});
+app.get('/', (req, res) =>{
+  res.sendFile(__dirname + '/index.html');
+    /* .replace(
+       `<ul class="list_chat"><li><span class="txt_msg">글을 입력해 주세요</span></li></ul>`
+       ,
+       `<ul class="list_chat"><li><span class="txt_msg">글을 입력해 주세요</span></li>${getBeforeMsg()}</ul>`
+     )*/
+});
 
 io.on('connection', function(socket){
   console.log('a user connected');
 
   socket.on('to-server-msg', function(msg){
-    console.log('');
     io.emit('to-client-msg', msg);
+    msgContainer.push(msg);
     console.log('message: ' + msg);
   });
 

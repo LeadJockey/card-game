@@ -54,8 +54,8 @@
       drawSnake('ai_jarvis')
     );
     // moveByUser('shawn');
-    moveByAI('ai_jarvis');
-    moveByAI('shawn');
+    moveByAI('ai_jarvis', jarvisAI);
+    moveByAI('shawn', jarvisAI);
   }
 
   function createMap(state){
@@ -282,8 +282,11 @@
     }, _state.fps);
   }
 
-  function moveByAI(id){
-    _state.snakePool[id].movement = setInterval(function(){
+  function moveByAI(id, ai){
+    _state.snakePool[id].movement = setInterval(ai(id), _state.fps);
+  }
+  function jarvisAI(id){
+    return function(){
       const newHead = directionHelper(findNear(id), _state.food, id);
       const targetSnake = _state.snakePool[id].body;
       const newTail = targetSnake[targetSnake.length - 1];
@@ -312,7 +315,7 @@
       // 이동
       targetSnake.unshift(newHead);
       snakeGame.setState('update-move', { snakes:getSnakes() });
-    }, _state.fps);
+    }
   }
 
 })(window.M);
