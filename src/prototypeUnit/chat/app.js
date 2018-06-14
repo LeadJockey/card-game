@@ -1,0 +1,39 @@
+const express = require('express');
+const app = express();
+const server = require('http').Server(app); // express 3/4 에서 사용
+const io = require('socket.io')(server);
+const morgan = require('morgan');
+const path = require('path');
+
+// set
+app.set('port', 3000);
+
+// // middleware
+app.use(morgan('dev'));
+app.use(express.json());
+app.use(express.urlencoded({ extended:true }));
+app.use( express.static( path.join( __dirname, '..', '..' ) ) );
+app.use( '/js', express.static( path.join( __dirname, 'public' ) ) );
+
+// server
+server.listen(app.get('port'), () =>{console.log(`server listening on port ${app.get('port')}`);});
+
+// socket
+app.get('/', (req, res)=>{res.sendFile(__dirname + '/index.html');});
+
+io.on('connection', function(socket){
+  console.log('a user connected');
+
+  socket.on('to-server-msg', function(msg){
+    console.log('');
+    io.emit('to-client-msg', msg);
+    console.log('message: ' + msg);
+  });
+
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+});
+
+
+

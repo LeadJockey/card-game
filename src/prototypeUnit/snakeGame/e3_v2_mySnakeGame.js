@@ -390,4 +390,4 @@ Pipeline.prototype.process = function(data){
     };
   }
 
-})(jQuery, Pipeline);
+})(jQuery, window.M.Pipeline);
