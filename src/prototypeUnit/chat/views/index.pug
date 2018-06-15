@@ -10,19 +10,26 @@ html
 		.chat_wrap
 			.area_game
 				canvas(class='game_canvas', id='canvas', width='500px', height='500px')
+				.game_ctrl
+					button(id='start') START
 			.area_chat
 				.scroll_chat
 					ul(class='list_chat')
 						li
+							span(class='txt_name') 운영
 							span(class='txt_msg') 글을 입력해 주세요
 						each msg in msgPool
 							li
-								span(class='txt_msg')=msg
+								span(class='txt_name')=msg.name
+								span(class='txt_msg')=msg.msg
 				.insert_chat
-					form(action='/')
-						input(id='userName', placeholder='무작위 슈퍼히어로')
-						input(id='userMsg', autocomplete='off')
-						button(id='submit') SEND
+					.wrap_insert
+						form(action='/')
+							fieldset
+								legend(class='screen_out') 채팅 메시지 입력 폼
+								.box_insert
+									input(id='userMsg' placeholder='여기에서 테스트 해보세요')
+								button(type='submit' id='submit') 확인
 
 		script(type='text/javascript', src='/socket.io/socket.io.js')
 		script(type='text/javascript', src='js/chat/client_chat.js')

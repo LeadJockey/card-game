@@ -5,20 +5,23 @@
   const randomName = randomNames[Math.floor(Math.random() * randomNames.length)];
   const socket = io();
 
-  const $name = $('#userName');
   const $msg = $('#userMsg');
   const $list = $('.list_chat');
   const $form = $('form');
 
   $form.onsubmit = function(){
-    socket.emit('to-server-msg', `[ ${$name.value === '' ? randomName:$name.value} ] ${$msg.value}`);
+    const msg = {
+      name:randomName,
+      msg:`${$msg.value}`
+    };
+    socket.emit('to-server-msg', msg);
     $msg.value = '';
     return false;
   };
 
   socket.on('to-client-msg', function(msg){
     const li = doc.createElement('li');
-    li.innerHTML = `<span class="txt_msg">${msg}</span>`;
+    li.innerHTML = `<span class="txt_name">${msg.name}</span><span class="txt_msg">${msg.msg}</span>`;
     $list.append(li);
     li.scrollIntoView(true);
   });

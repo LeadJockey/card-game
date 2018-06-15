@@ -24,21 +24,8 @@ app.use('/js', express.static(path.join(__dirname, '..', '..', 'prototypeUnit'))
 server.listen(app.get('port'), () =>{console.log(`server listening on port ${app.get('port')}`);});
 
 // socket
-// app.get('/', (req, res) =>{
-//   res.sendFile(__dirname + '/index.html');
-//     /* .replace(
-//        `<ul class="list_chat"><li><span class="txt_msg">글을 입력해 주세요</span></li></ul>`
-//        ,
-//        `<ul class="list_chat"><li><span class="txt_msg">글을 입력해 주세요</span></li>${getBeforeMsg()}</ul>`
-//      )*/
-// });
 app.get('/', (req, res) =>{
   res.render('index',{msgPool:msgPool});
-  /* .replace(
-     `<ul class="list_chat"><li><span class="txt_msg">글을 입력해 주세요</span></li></ul>`
-     ,
-     `<ul class="list_chat"><li><span class="txt_msg">글을 입력해 주세요</span></li>${getBeforeMsg()}</ul>`
-   )*/
 });
 
 io.on('connection', function(socket){
@@ -47,7 +34,7 @@ io.on('connection', function(socket){
   socket.on('to-server-msg', function(msg){
     io.emit('to-client-msg', msg);
     msgPool.push(msg);
-    console.log('message: ' + msg);
+    console.log(`message: ${msg.name}${msg.msg}`);
   });
 
   socket.on('disconnect', function(){
