@@ -7,9 +7,10 @@ body{background-color:gray}
 .chat_wrap .area_game{float:left}
 .chat_wrap .game_canvas{display:block;background-color:#fff}
 .chat_wrap .area_chat{position:absolute; top:0;bottom:0;right:0;left:400px;background-color:rgba(81, 176, 254, 0.95)}
-.chat_wrap .scroll_chat{overflow:scroll;height:500px;padding:10px}
+.chat_wrap .scroll_chat{overflow:scroll;height:400px;padding:10px}
 .chat_wrap .list_chat{}
 .chat_wrap .list_chat li{margin-bottom:18px;}
 .chat_wrap .list_chat .txt_name{margin-right:5px;font-weight:bolder}
 .chat_wrap .list_chat .txt_msg{padding:5px 13px;background-color:yellow;border-radius:7px}
 #userMsg{width:100%}
+#submit{width:100%}

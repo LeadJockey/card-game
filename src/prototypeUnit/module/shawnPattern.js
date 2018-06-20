@@ -18,7 +18,7 @@
   Structure.prototype.setState = function(type, newState){
     Object.assign(this.state, newState);
     this.trigger(type);
-    // console.log(this.state);
+    console.log(this.state);
   };
   Structure.prototype.renderedBy = function(type){
     const that = this;

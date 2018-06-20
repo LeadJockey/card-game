@@ -87,7 +87,7 @@
     let gage = min;
     setInterval(function(){
       if(_state.gage >= min && _state.gage < max){
-        gage += 1;
+        gage += 2;
       }else{
         gage = min;
       }
@@ -110,7 +110,7 @@
     const gage = _state.gage;
     let score = 0;
 
-    if(equal(_state.userCode,_state.givenWords)){
+    if(equal(_state.givenWords,_state.userCode)){
       if(gage > 260 && gage < 320){
         score = 40 * 2;
       }else if(gage > 160 && gage < 250){
@@ -221,4 +221,4 @@
 
   }
 
-})(document, window.M);
+})(document, window);
