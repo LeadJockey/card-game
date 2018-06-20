@@ -59,9 +59,9 @@
         drawSnake('shawn'),
         drawSnake('ai_jarvis')
       );
-      moveByUser('shawn');
+      // moveByUser('shawn');
       moveByAI('ai_jarvis', jarvisAI);
-      // moveByAI('shawn', jarvisAI);
+      moveByAI('shawn', jarvisAI);
     }
 
     function restart(_presetState, ){

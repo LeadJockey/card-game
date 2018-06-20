@@ -1,0 +1,15 @@
+*{margin:0;padding:0}
+ul{list-style:none}
+body{background-color:gray}
+.screen_out{overflow:hidden;position:absolute;width:0;height:0;line-height:0;text-indent:-3500px}
+
+.chat_wrap{overflow:hidden;position:relative;width:700px;margin:20px auto}
+.chat_wrap .area_game{float:left}
+.chat_wrap .game_canvas{display:block;background-color:#fff}
+.chat_wrap .area_chat{position:absolute; top:0;bottom:0;right:0;left:400px;background-color:rgba(81, 176, 254, 0.95)}
+.chat_wrap .scroll_chat{overflow:scroll;height:500px;padding:10px}
+.chat_wrap .list_chat{}
+.chat_wrap .list_chat li{margin-bottom:18px;}
+.chat_wrap .list_chat .txt_name{margin-right:5px;font-weight:bolder}
+.chat_wrap .list_chat .txt_msg{padding:5px 13px;background-color:yellow;border-radius:7px}
+#userMsg{width:100%}

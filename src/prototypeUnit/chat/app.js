@@ -27,6 +27,9 @@ server.listen(app.get('port'), () =>{console.log(`server listening on port ${app
 app.get('/', (req, res) =>{
   res.render('index',{msgPool:msgPool});
 });
+app.get('/audition', (req, res) =>{
+  res.render('rhythmGame',{msgPool:msgPool});
+});
 
 io.on('connection', function(socket){
   console.log('a user connected');
