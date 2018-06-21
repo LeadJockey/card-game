@@ -30,6 +30,9 @@ app.get('/', (req, res) =>{
 app.get('/audition', (req, res) =>{
   res.render('rhythmGame',{msgPool:msgPool});
 });
+app.get('/card',(req,res)=>{
+
+});
 
 io.on('connection', function(socket){
   console.log('a user connected');

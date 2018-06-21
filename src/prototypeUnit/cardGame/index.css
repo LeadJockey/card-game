@@ -1,0 +1,19 @@
+*{margin:0;padding:0}
+ul{list-style:none}
+.screen_out{overflow:hidden;position:absolute;width:0;height:0;line-height:0;text-indent:-3500px}
+
+.wrap_game{width:800px;height:600px;margin: 20px auto}
+.wrap_game .field_away{height:300px;background-color:plum}
+.wrap_game .field_home{height:300px;background-color:powderblue}
+
+.wrap_game .list-card{overflow:hidden}
+.wrap_game .list-card li{float:left;width:140px;height:200px;padding:0 10px;background-color:white}
+.wrap_game .list-card li .group_thumb{height:120px}
+.wrap_game .list-card li .group_thumb img{vertical-align:top}
+.wrap_game .list-card li .group_txt{height:45px;padding:5px;font-size:14px;overflow-y:scroll}
+.wrap_game .list-card li .group_txt .txt_inner{text-align:center}
+.wrap_game .list-card li .group_info {overflow:hidden}
+.wrap_game .list-card li .group_info .txt_cost{float:left;width:20px;font-size:18px;text-align:center;background-color:blue;color:white}
+.wrap_game .list-card li .group_info .txt_health{float:left;width:20px;font-size:18px;text-align:center;background-color:green;color:white}
+.wrap_game .list-card li .group_info .txt_attack{float:left;width:20px;font-size:18px;text-align:center;background-color:red;color:white}
+
