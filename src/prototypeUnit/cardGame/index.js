@@ -1,139 +1,104 @@
 (function(doc, _){
   'use strict';
+  //util
+  function getElems(selector, parent){
+    return Array.prototype.slice.call((parent || doc).querySelectorAll(selector));
+  }
+  function hasClass(elem, className){
+    if(!elem || !elem.classList || !elem.classList.value){
+      return false;
+    }
+    return elem.classList.value.indexOf(className) > -1;
+  }
 
-  const p1 = new _.Player({
-    id:0,
-    name:'shawn',
-    cost:0,
-    life:10,
-    attack:1,
-    decks:['뿅망치 무지','고뇌하는 라이언'],
-    cards:[],
-    summons:[],
-    effects:[]
-  });
-  const p2 = new _.Player({
-    id:1,
-    name:'bred',
-    cost:0,
-    life:10,
-    attack:1,
-    decks:['고뇌하는 라이언','뿅망치 무지'],
-    cards:[],
-    summons:[],
-    effects:[]
-  });
+  //elem
+  const ctx = getElems('.wrap_game')[0];
+  const awayCardList = getElems('.field_away .list_summon', ctx)[0];
+  const homeCardList = getElems('.field_home .list_summon', ctx)[0];
 
+  //game structure
   const presetState = {
-    players:[p1,p2],
-    cost:1,
-    turn:1,
-    timeout:60
+    home:new _.Player({
+      id:0,
+      name:'shawn',
+      cost:0,
+      life:10,
+      attack:1,
+      decks:[],
+      cards:[new _.Card(1,_.cards[0]),new _.Card(2,_.cards[0]),new _.Card(3,_.cards[0]),new _.Card(4,_.cards[0])],
+      summons:[],
+      effects:[]
+    }),
+    away:new _.Player({
+      id:1,
+      name:'bred',
+      cost:0,
+      life:10,
+      attack:1,
+      decks:[],
+      cards:[new _.Card(5,_.cards[1]), new _.Card(6,_.cards[1])],
+      summons:[],
+      effects:[]
+    })
   };
-  console.log('preset',presetState);
-  const kakaoStone = new _.Game(presetState);
-  const _state = kakaoStone.state;
+  const game = new _.Game(presetState);
 
-  //initialize game
-  pickCards();
-  // rendering
-  kakaoStone.renderedBy('init')();
-  kakaoStone.renderedBy('update')();
-  kakaoStone.renderedBy('timeout')();
 
-// drag
-  
-  const cardList = Array.prototype.slice.call(doc.querySelectorAll('.list-card li'));
+  function createCardTemplate(opts, team){
+    const card = doc.createElement('li');
+    card.setAttribute('data-uniqueId',opts.uniqueId);
+    card.setAttribute('class', team);
+    card.setAttribute('draggable', 'true');
+    card.innerHTML = `
+      <div>unique:${opts.uniqueId}</div>
+      <img src="https://dummyimage.com/100x100/000/fff" draggable="false" alt="">
+      <div>att:${opts.attack}  -------  ${opts.life}:life</div>
+    `;
+    return card;
+  }
 
-  let dragged;
+  function drawCards(appendTarget, team){
+    return ()=>{
+      game.state[team].cards.map((card)=>{
+        appendTarget.appendChild(createCardTemplate(card,team));
+      });
+    }
+  }
 
-  cardList.forEach((elem, i) =>{
-    elem.addEventListener('dragstart', (e) =>{
-      console.log('dragstart' + i);
-      dragged = e.target;
-      console.log(dragged);
-      e.target.style.display = "none";
-    },false);
-    // elem.addEventListener('dragover', () =>{
-    //   // console.log('dragover' + i);
-    // });
-    doc.addEventListener('drop', (e) =>{
-      // prevent default action (open as link for some elements)
-      event.preventDefault();
-      // move dragged elem to the selected drop target
-      if ( e.target.className === "dropzone" ) {
-        e.target.style.background = "";
-        dragged.parentNode.removeChild( dragged );
-        e.target.appendChild( dragged );
-      }    });
-    // doc.addEventListener('dragleave', (e) =>{
-    //   console.log('dragleave',e.target);
-    //   console.log('dragleave,dragged',dragged);
-    // });
+  drawCards(awayCardList, 'away')();
+  drawCards(homeCardList, 'home')();
+
+
+  function battle(attacker, defender){
+    defender.life -= attacker.attack;
+    attacker.life -= defender.attack;
+  }
+
+  let currentTarget = null;
+  let attacker = null;
+
+  doc.addEventListener('dragstart',(e)=>{
+    console.log('dragstart', e.target);
+    attacker = e.target;
+    setTimeout(()=> attacker.className="invisible", 100);
+  });
+  doc.addEventListener('dragenter',(e)=>{
+    currentTarget = e.target;
+  });
+  doc.addEventListener('dragover',(e)=>{
+    // console.log('dragover');
+  });
+  doc.addEventListener('dragend',(e)=>{
+    e.target.classList = 'home';
+    console.log('dragend',currentTarget);
+    if(currentTarget){
+
+      // console.log(game.state.away.cards);
+      // const t = game.state.away.cards.filter((card)=>card.id === 0);
+      // console.log(t);
+    }
   });
 
-  // doc.addEventListener('dragstart',()=>{
-  //   console.log('dragstart');
-  // });
-  // doc.addEventListener('dragover',()=>{
-  //   console.log('dragover');
-  // });
-  // doc.addEventListener('dragdrop',()=>{
-  //   console.log('dragend');
-  // });
-  // doc.addEventListener('drop',()=>{
-  //   console.log('drop');
-  // });
-  // doc.addEventListener('dragenter',()=>{
-  //   console.log('dragenter');
-  // });
-  //
-  function dragStart(ev) {
-    console.log('dragStart');
-    // ev.dataTransfer.effectAllowed='copy';
-    // ev.dataTransfer.setData("id", ev.target.getAttribute('id'));
-    // ev.dataTransfer.setDragImage(ev.target,100,100);
-    return true;
-  }
-  function dragEnter(ev) {
-    event.preventDefault();
-    return true;
-  }
-  function dragOver(ev) {
-    event.preventDefault();
-  }
-  function dragDrop(ev) {
-    // const data = ev.dataTransfer.getData("id");
-    // ev.target.appendChild(document.getElementById(data));
-    // ev.stopPropagation();
-    return false;
-  }
 
-  // set
-  function pickCards(){
-    const newPlayers = [];
-    _state.players.map((player) =>{
-      const newCard = player.decks[getRandomIdx(player.decks.length)];
-      const newCards = player.cards.concat(newCard);
-      const newPlayer = { ...player, cards:newCards };
-      console.log(`#${player.name} : new Card picked`, newCards);
-      newPlayers.push(newPlayer);
-    });
-    kakaoStone.setState('set', { players:newPlayers});
-  }
-
-  //get
-  function getRandomIdx(length, start){
-    return Math.floor((Math.random() * length) + (start || 0));
-  }
-
-  // event
-  function battle(attacker, defender){
-
-  }
-  // draw
-  function drawCards(){
-
-  }
 
 })(document, window.KaKaoStone);

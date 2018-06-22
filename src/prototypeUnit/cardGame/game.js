@@ -6,8 +6,9 @@
       level:1,
       cost:1,
       attack:1,
-      life:1,
+      life:5,
       desc:'무지가 무작위 아군에게 뿅망치를 선물합니다. 뿅망치를 받은 아군은 공격력 +2',
+      elem:'',
       skill:function(){}
     },
     {
@@ -18,11 +19,13 @@
       attack:2,
       life:5,
       desc:'라이언이 고뇌하기 시작합니다. 도발',
+      elem:'',
       skill:function(){}
     }
   ];
 
-  function Card(data){
+  function Card(uniqueId,data){
+    this.uniqueId = uniqueId;
     this.name = data.name;
     this.type = data.type;
     this.level = data.level;
