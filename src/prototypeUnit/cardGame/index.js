@@ -1,20 +1,5 @@
 (function(doc, _){
   'use strict';
-  //util
-  function getElems(selector, parent){
-    return Array.prototype.slice.call((parent || doc).querySelectorAll(selector));
-  }
-  function hasClass(elem, className){
-    if(!elem || !elem.classList || !elem.classList.value){
-      return false;
-    }
-    return elem.classList.value.indexOf(className) > -1;
-  }
-
-  //elem
-  const ctx = getElems('.wrap_game')[0];
-  const awayCardList = getElems('.field_away .list_summon', ctx)[0];
-  const homeCardList = getElems('.field_home .list_summon', ctx)[0];
 
   //game structure
   const presetState = {
@@ -24,27 +9,56 @@
       cost:0,
       life:10,
       attack:1,
-      decks:[],
-      cards:[new _.Card(1,_.cards[0]),new _.Card(2,_.cards[0]),new _.Card(3,_.cards[0]),new _.Card(4,_.cards[0])],
+      decks:[
+        new _.Card(1, _.cards[0]),
+        new _.Card(2, _.cards[0]),
+        new _.Card(3, _.cards[0]),
+        new _.Card(4, _.cards[0])
+      ],
+      cards:[],
       summons:[],
       effects:[]
     }),
     away:new _.Player({
       id:1,
-      name:'bred',
+      name:'brad',
       cost:0,
       life:10,
       attack:1,
       decks:[],
-      cards:[new _.Card(5,_.cards[1]), new _.Card(6,_.cards[1])],
+      cards:[
+        new _.Card(5, _.cards[1]),
+        new _.Card(6, _.cards[1])
+      ],
       summons:[],
       effects:[]
-    })
+    }),
+    cost:1
   };
   const game = new _.Game(presetState);
+  const util = new _.Util(doc);
 
 
-  function createCardTemplate(opts, team){
+  //elem
+  const ctx = util.select('.wrap_game');
+  const awayCardList = util.select('.field_away .list_summon', ctx);
+  const homeCardList = util.select('.field_home .list_summon', ctx);
+  const btn = util.select('#btn', ctx);
+
+  //setCard
+  //getCard
+  //drawCard
+  //onBattle
+  //onTurnOver
+
+  function playACard(){
+    const randomIdx = Math.floor(Math.random() * game.state.home.decks.length);
+    const randomCard = game.state.home.decks[randomIdx];
+    game.state.home.cards.push(randomCard);
+    game.trigger('update');
+  }
+  
+  function setCard(opts, team){
     const card = doc.createElement('li');
     card.setAttribute('data-uniqueId',opts.uniqueId);
     card.setAttribute('class', team);
@@ -56,46 +70,77 @@
     `;
     return card;
   }
-
+  function getCard(type, uniqueId){
+    return game.state[type].cards.filter((card)=>card.uniqueId === uniqueId)[0];
+  }
   function drawCards(appendTarget, team){
     return ()=>{
-      game.state[team].cards.map((card)=>{
-        appendTarget.appendChild(createCardTemplate(card,team));
+      appendTarget.innerHTML ='';
+      game.state[team].cards.filter((card)=>card.life >0).map((card)=>{
+        appendTarget.appendChild(setCard(card,team));
       });
     }
   }
 
-  drawCards(awayCardList, 'away')();
-  drawCards(homeCardList, 'home')();
+  game.renderedBy('update')(
+    drawCards(awayCardList, 'away'),
+    drawCards(homeCardList, 'home')
+  );
+  game.trigger('update');
 
 
   function battle(attacker, defender){
+    console.log('battle start');
     defender.life -= attacker.attack;
     attacker.life -= defender.attack;
+    game.setState({})
+    game.trigger('update');
+    console.log(game.state);
   }
 
-  let currentTarget = null;
-  let attacker = null;
+  //card.onBattle
+  //
 
+  let fromTarget = null;
+  let toTarget = null;
+
+
+  btn.addEventListener('click',()=>{
+    playACard();
+  });
   doc.addEventListener('dragstart',(e)=>{
-    console.log('dragstart', e.target);
-    attacker = e.target;
-    setTimeout(()=> attacker.className="invisible", 100);
+    // console.log('dragstart', e.target);
+    fromTarget = e.target;
+    setTimeout(()=> fromTarget.className="invisible", 100);
   });
   doc.addEventListener('dragenter',(e)=>{
-    currentTarget = e.target;
+    const tmp = util.parent('LI', e.target);
+    if(!tmp || tmp.classList.value.indexOf('away') === -1){return;}
+      if(toTarget){
+      toTarget.style.backgroundColor = 'white';
+      }
+      toTarget = tmp;
+      toTarget.style.backgroundColor = 'red';
+      console.log(toTarget);
   });
   doc.addEventListener('dragover',(e)=>{
-    // console.log('dragover');
+    // if(e.target.classList = 'away'){
+    //   // console.log(e.target);
+    // }
   });
   doc.addEventListener('dragend',(e)=>{
     e.target.classList = 'home';
-    console.log('dragend',currentTarget);
-    if(currentTarget){
-
-      // console.log(game.state.away.cards);
-      // const t = game.state.away.cards.filter((card)=>card.id === 0);
-      // console.log(t);
+    if(toTarget){
+      battle(
+        getCard('away', Number.parseInt(toTarget.dataset.uniqueid, 10)),
+        getCard('home', Number.parseInt(fromTarget.dataset.uniqueid, 10))
+      );
+      console.log(fromTarget);
+      const t = util.select(`[data-uniqueId='${fromTarget.dataset.uniqueid}']`);
+      t.style.backgroundColor = 'gray';
+      t.getAttribute('draggable');
+      t.setAttribute('draggable', 'false');
+      fromTarget = null;
     }
   });
 

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="background-color:gray">
+<canvas id="canvas" width="500" height="500" style="background-color:white">canvas not supported!</canvas>
+<script>
+  (function(doc){
+    'use strict';
+
+    const canvas = doc.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let i = 0;
+
+    const mop = {
+      hp:100,
+      x:0,
+      y:0,
+      onDemaged:function(dmg){
+        this.hp -= dmg;
+      },
+      moveTo:function(x, y){
+        console.log(mop);
+        this.x = x;
+        this.y = y;
+      }
+    };
+    const tower = {
+      dmg:10,
+      isFired:true,
+      dps:5000,
+      max_range:200,
+      min_range:5,
+      fire:function(mop, distance){
+        if(this.max_range > distance && distance >= this.min_range){
+          if(this.isFired){
+            console.log('fire!!');
+            mop.onDemaged(this.dmg);
+            this.isFired = false;
+            let per = 0;
+            setInterval(()=>{
+              shoot(300,300,mop.x * per++, mop.y* per++);
+            },500);
+            setTimeout(()=>{
+              this.isFired = true;
+            },this.dps);
+          }
+        }
+      }
+    };
+
+    const movement = setInterval(() =>{
+      const tick = i++;
+      //clear
+      clear();
+
+      mop.moveTo(tick, 10);
+      drawSquare(tick,10, 'red'); // mop
+
+      tower.fire(mop,tick);
+
+      drawSquare(300,300,'blue'); //tower
+    }, 500);
+
+    //200
+    function shoot(fromX,fromY,toX,toY){
+      const x = Math.floor((fromX - toX * 2));
+      const y = Math.floor((fromY - toY * 2));
+      drawSquare(x,y,'green');
+    }
+
+
+
+    function clear(){
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
+
+    function drawSquare(x,y,c){
+      ctx.fillStyle = c;
+      ctx.fillRect(x,y,100,100);
+    }
+
+
+  })(document);
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>

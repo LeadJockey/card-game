@@ -1,4 +1,6 @@
 (function(exports){
+  'use strict';
+
   const cards = [
     {
       name:'뿅망치 무지',
@@ -49,6 +51,7 @@
 
   exports.KaKaoStone = {};
   exports.KaKaoStone.Game = exports.M.Structure;
+  exports.KaKaoStone.Util = exports.M.Util;
   exports.KaKaoStone.cards = cards;
   exports.KaKaoStone.Card = Card;
   exports.KaKaoStone.Player = Player;
