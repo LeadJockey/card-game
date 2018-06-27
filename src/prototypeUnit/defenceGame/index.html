@@ -12,86 +12,233 @@
 
     const canvas = doc.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+    const objectScale = 50;
+    const fps = 10;
+    const towers = [new Tower({x:200,y:200,color:'blue'})];
+    const paths = [
+      {x:50,y:0},
+      {x:50,y:50},
+      {x:50,y:100},
+      {x:100,y:100},
+      {x:150,y:100},
+      {x:200,y:100},
+      {x:250,y:100},
+      {x:300,y:100},
+      {x:300,y:100},
+      {x:300,y:150},
+      {x:300,y:200},
+      {x:300,y:250},
+      {x:300,y:300},
+      {x:250,y:300},
+      {x:200,y:300},
+      {x:150,y:300},
+      {x:100,y:300},
+      {x:50,y:300},
+      {x:0,y:300},
+      {x:0,y:350},
+      {x:0,y:400},
+      {x:0,y:450},
+      {x:50,y:450},
+      {x:100,y:450},
+      {x:150,y:450},
+      {x:200,y:450},
+      {x:200,y:400},
+      {x:250,y:400},
+      {x:300,y:400},
+      {x:350,y:400},
+      {x:400,y:400},
+      {x:400,y:350},
+      {x:400,y:300},
+      {x:400,y:250},
+      {x:400,y:200},
+      {x:400,y:150},
+      {x:400,y:100},
+      {x:400,y:50},
+      {x:400,y:0},
+      {x:350,y:0},
+      {x:300,y:0},
+      {x:250,y:0},
+      {x:200,y:0},
+      {x:150,y:0},
+      {x:100,y:0},
+    ];
+    const spots = [
+      new Spot({x:50,y:0,color:'rgba(0, 255, 0, 0.5)',direction:'bottom'}),
+      new Spot({x:50,y:100,color:'rgba(255, 155, 5, 0.2)',direction:'right'}),
+      new Spot({x:300,y:100,color:'rgba(255, 155, 5, 0.2)',direction:'bottom'}),
+      new Spot({x:300,y:300,color:'rgba(255, 155, 5, 0.2)',direction:'left'}),
+      new Spot({x:0,y:300,color:'rgba(255, 155, 5, 0.2)',direction:'bottom'}),
+      new Spot({x:0,y:450,color:'rgba(255, 155, 5, 0.2)',direction:'right'}),
+      new Spot({x:200,y:450,color:'rgba(255, 155, 5, 0.2)',direction:'top'}),
+      new Spot({x:200,y:400,color:'rgba(255, 155, 5, 0.2)',direction:'right'}),
+      new Spot({x:400,y:400,color:'rgba(255, 155, 5, 0.2)',direction:'top'}),
+      new Spot({x:400,y:0,color:'rgba(255, 155, 5, 0.2)',direction:'left'}),
+    ];
+    const wave =[];
 
-    let i = 0;
+    let tick = 0;
 
-    const mop = {
-      hp:100,
-      x:0,
-      y:0,
-      onDemaged:function(dmg){
-        this.hp -= dmg;
-      },
-      moveTo:function(x, y){
-        console.log(mop);
-        this.x = x;
-        this.y = y;
+    function Tower(opts){
+      this.x = opts.x;
+      this.y = opts.y;
+      this.color = opts.color;
+    }
+    Tower.prototype.draw = function(){
+      drawSquare(this.x, this.y, this.color);
+    };
+
+    function Spot(opts){
+      this.x = opts.x;
+      this.y = opts.y;
+      this.color = opts.color;
+      this.direction = opts.direction;
+    }
+    Spot.prototype.track = function(monster){
+      if(!(this.x === monster.x && this.y === monster.y)){
+        return this;
+      }
+      monster.moveTo(this.direction);
+      return this;
+    };
+    Spot.prototype.draw = function(){
+      drawSquare(this.x,this.y,this.color);
+    };
+
+    function Monster(opts){
+      this.x = opts.x;
+      this.y = opts.y;
+      this.hp = opts.hp || 100;
+      this.status = ['live','slow','haste'];
+      this.color = opts.color;
+      this.speed = opts.speed;
+      this.direction = opts.direction;
+      this.minFrame = opts.minFrame;
+      this.maxFrame = opts.maxFrame;
+    }
+    Monster.prototype.destroy = function(){
+      this.status = ['die'];
+    };
+    Monster.prototype.damaged = function(damage){
+      const afterDamaged = this.hp - damage;
+      if(afterDamaged < 1){
+        console.log('die');
+        this.destroy();
+      }else{
+        console.log('damaged : ', damage);
+        this.hp = afterDamaged;
       }
     };
-    const tower = {
-      dmg:10,
-      isFired:true,
-      dps:5000,
-      max_range:200,
-      min_range:5,
-      fire:function(mop, distance){
-        if(this.max_range > distance && distance >= this.min_range){
-          if(this.isFired){
-            console.log('fire!!');
-            mop.onDemaged(this.dmg);
-            this.isFired = false;
-            let per = 0;
-            setInterval(()=>{
-              shoot(300,300,mop.x * per++, mop.y* per++);
-            },500);
-            setTimeout(()=>{
-              this.isFired = true;
-            },this.dps);
-          }
+    Monster.prototype.toTheRight = function(){
+      const nextStep = this.x + this.speed;
+      if(!this.isInFrame(nextStep)){
+        return;
+      }
+      this.x = nextStep;
+      this.direction = 'right';
+    };
+    Monster.prototype.toTheLeft = function(){
+      const nextStep = this.x - this.speed;
+      if(!this.isInFrame(nextStep)){
+        return;
+      }
+      this.x = nextStep;
+      this.direction = 'left';
+    };
+    Monster.prototype.toTheTop = function(){
+      const nextStep = this.y - this.speed;
+      if(!this.isInFrame(nextStep)){
+        return;
+      }
+      this.y = nextStep;
+      this.direction = 'top';
+    };
+    Monster.prototype.toTheBottom = function(){
+      const nextStep = this.y + this.speed;
+      if(!this.isInFrame(nextStep)){
+        return;
+      }
+      this.y = nextStep;
+      this.direction = 'bottom';
+    };
+    Monster.prototype.isInFrame = function(nextStep){
+      return nextStep > this.minFrame - 1 && nextStep < this.maxFrame + 1;
+    };
+    Monster.prototype.isLive = function(){
+      return this.status.toString().indexOf('live') > -1;
+    };
+    Monster.prototype.moveTo = function(direction){
+      switch(direction){
+        case 'right':
+          this.toTheRight();
+          break;
+        case 'left':
+          this.toTheLeft();
+          break;
+        case 'top':
+          this.toTheTop();
+          break;
+        case 'bottom':
+          this.toTheBottom();
+          break;
+        default:
+          break;
+      }
+      return this;
+    };
+    Monster.prototype.draw = function(){
+      if(!this.isLive()){
+        return;
+      }
+      ctx.beginPath();
+      ctx.arc(this.x + (objectScale / 2), this.y + (objectScale / 2), 20, 0, 2*Math.PI, false);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    };
+
+
+    // init
+    setInterval(() =>{
+      tick++;
+
+      if(tick % 50 === 0){
+        if(wave[0].isLive()){
+          wave[0].damaged(10);
         }
       }
-    };
 
-    const movement = setInterval(() =>{
-      const tick = i++;
-      //clear
-      clear();
+      setWave(tick, 300, 10, { x:50, y:0, color:'red', speed:10, direction:'bottom', minFrame:0, maxFrame:canvas.width - objectScale });
+      drawClearScreen();
+      drawShape(paths, 'gold');
+      towers.map((tower)=>tower.draw());
+      spots.map((spot) =>{spot.draw();});
+      wave.filter((monster)=>monster.isLive()).map((monster) =>{
+        monster.moveTo(monster.direction).draw();
+        spots.map((spot) =>{spot.track(monster);});
+      });
+    }, fps);
 
-      mop.moveTo(tick, 10);
-      drawSquare(tick,10, 'red'); // mop
-
-      tower.fire(mop,tick);
-
-      drawSquare(300,300,'blue'); //tower
-    }, 500);
-
-    //200
-    function shoot(fromX,fromY,toX,toY){
-      const x = Math.floor((fromX - toX * 2));
-      const y = Math.floor((fromY - toY * 2));
-      drawSquare(x,y,'green');
+    function setWave(tick, delay, length, opts){
+      if(!((tick === 1 || tick % delay === 0) && wave.length < length)){
+        return;
+      }
+      wave.push(new Monster(opts));
     }
 
-
-
-    function clear(){
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-    }
-
-    function drawSquare(x,y,c){
+    function drawSquare(x, y, c){
       ctx.fillStyle = c;
-      ctx.fillRect(x,y,100,100);
+      ctx.fillRect(x, y, objectScale, objectScale);
+    }
+    function drawClearScreen(){
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function drawShape(list, color){
+      list.map((item) =>{
+        drawSquare(item.x, item.y, color);
+      });
     }
 
 
   })(document);
-
-
-
-
-
-
 
 
 </script>
