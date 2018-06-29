@@ -231,7 +231,7 @@
       x:100,
       y:0
     },
-  ];
+  ]; // 길 그리기 좌
   const spots = [
     new Spot({ x:50, y:0, color:'rgba(255, 155, 5, 0.2)', direction:'bottom' }),
     new Spot({
@@ -300,18 +300,19 @@
   });
 
   // init
-  doc.getElementById('btn').addEventListener('click',()=>{
-    init();
-  });
+  init();
+
 
   function init(){
-    game = setInterval(gameLoop, gameFps);
-    wave1 = setInterval(monsterFactory(10), waveFps);
+    doc.getElementById('btn').addEventListener('click',()=>{
+      game = setInterval(gameLoop, gameFps);
+      wave1 = setInterval(monsterFactory(10), waveFps);
+    });
   }
 
   function gameLoop(){
     render.clearScreen();
-    render.drawImage()({imgSrc:'images/background3.png',x:0,y:0})();
+    // render.drawImage()({imgSrc:'images/background3.png',x:0,y:0})();
     // render.drawAll(paths, render.drawSquare({ color:'yellow' }));
     towers.map(tower => tower.print(/*render.drawSquare(tower),*/render.drawImage(tower)));
     spots.map(spot => spot.print(render.drawSquare(spot)));
@@ -319,7 +320,7 @@
         .map((monster) =>{
           spots.map(spot => spot.track(monster));
           monster.moveTo(monster.direction).print(render.drawArc());
-          // towers.map(tower => tower.fire(monster));
+          towers.map(tower => tower.fire(render.drawLine(tower,monster)));
         });
   }
 

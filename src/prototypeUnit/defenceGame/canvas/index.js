@@ -21,6 +21,17 @@
 
     };
   };
+  Render.prototype.drawLine = function(from,to){
+    const that = this;
+    return ()=>{
+      that.ctx.beginPath();
+      that.ctx.moveTo(from.x+20,from.y+20);
+      that.ctx.lineTo(to.x+20,to.y+20);
+      that.ctx.strokeStyle = '#ef009d';
+      that.ctx.stroke();
+    }
+
+  };
   Render.prototype.drawSquare = function(opts){
     const that = this;
     return (addOpts) =>{
