@@ -26,7 +26,7 @@
       attackSpeed:gameFps * 4
     }),
     new Tower({
-      x:450,
+      x:400,
       y:450,
       color:'rgba(10, 100, 200, 0.5)',
       imgSrc:'images/tower14.png',
@@ -233,12 +233,7 @@
     },
   ];
   const spots = [
-    new Spot({
-      x:50,
-      y:0,
-      color:'rgba(0, 255, 0, 0.5)',
-      direction:'bottom'
-    }),
+    new Spot({ x:50, y:0, color:'rgba(255, 155, 5, 0.2)', direction:'bottom' }),
     new Spot({
       x:50,
       y:100,
@@ -305,13 +300,20 @@
   });
 
   // init
-  game = setInterval(gameLoop, gameFps);
-  wave1 = setInterval(monsterFactory(10), waveFps);
+  doc.getElementById('btn').addEventListener('click',()=>{
+    init();
+  });
+
+  function init(){
+    game = setInterval(gameLoop, gameFps);
+    wave1 = setInterval(monsterFactory(10), waveFps);
+  }
 
   function gameLoop(){
     render.clearScreen();
-    render.drawAll(paths, render.drawSquare({ color:'yellow' }));
-    towers.map(tower => tower.print(render.drawSquare(tower),render.drawImage(tower)));
+    render.drawImage()({imgSrc:'images/background3.png',x:0,y:0})();
+    // render.drawAll(paths, render.drawSquare({ color:'yellow' }));
+    towers.map(tower => tower.print(/*render.drawSquare(tower),*/render.drawImage(tower)));
     spots.map(spot => spot.print(render.drawSquare(spot)));
     wave.filter(monster => monster.isLive())
         .map((monster) =>{

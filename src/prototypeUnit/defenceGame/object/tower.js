@@ -43,8 +43,8 @@
     // ctx.strokeStyle = "green";
     // ctx.stroke();
   };
-  Tower.prototype.print = function(render, imgRender){
-    render(this)();
+  Tower.prototype.print = function(/*render, */imgRender){
+    // render(this)();
     imgRender(this)();
   };
 })(window);
