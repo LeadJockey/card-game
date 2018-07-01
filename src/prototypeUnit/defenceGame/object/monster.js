@@ -12,7 +12,7 @@
     this.hp = opts.hp || 100;
     this.size = opts.size;
     this.status = ['live'];
-    this.color = opts.color;  
+    this.color = opts.color;
     this.speed = opts.speed;
     this.direction = opts.direction;
     this.minFrame = opts.minFrame;
