@@ -4,7 +4,9 @@
   exports.G = exports.G ? exports.G : {};
   exports.G.Monster = exports.G.Monster ? exports.G.Monster : Monster;
 
+  let id = 0;
   function Monster(opts){
+    this.id = id++;
     this.x = opts.x;
     this.y = opts.y;
     this.hp = opts.hp || 100;

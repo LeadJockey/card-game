@@ -6,6 +6,7 @@
   const Tower = imports.Tower;
   const Monster = imports.Monster;
   const Spot = imports.Spot;
+  const Missile = imports.Missile;
 
   // elem
   const canvas = doc.getElementById('canvas');
@@ -15,39 +16,70 @@
   const objectScale = 50;
   const sec = 1000;
   const gameFps = sec / 60;
-  const waveFps = gameFps * 100;
+  const waveFps = gameFps*100;
   const towers = [
     new Tower({
       x:200,
       y:200,
+      dmg:10,
       color:'rgba(10, 100, 200, 0.5)',
       imgSrc:'images/tower14.png',
       scale:objectScale,
-      attackSpeed:gameFps * 4
+      speed: 2
     }),
     new Tower({
       x:400,
       y:450,
+      dmg:10,
       color:'rgba(10, 100, 200, 0.5)',
       imgSrc:'images/tower14.png',
       scale:objectScale,
-      attackSpeed:gameFps * 4
+      speed: 2
     }),
     new Tower({
       x:100,
       y:350,
+      dmg:10,
       color:'rgba(10, 100, 200, 0.5)',
       imgSrc:'images/tower14.png',
       scale:objectScale,
-      attackSpeed:gameFps * 4
+      speed: 2
     }),
     new Tower({
       x:350,
       y:50,
+      dmg:10,
       color:'rgba(10, 100, 200, 0.5)',
       imgSrc:'images/tower14.png',
       scale:objectScale,
-      attackSpeed:gameFps * 4
+      speed: 2
+    }),
+    new Tower({
+      x:250,
+      y:250,
+      dmg:10,
+      color:'rgba(10, 100, 200, 0.5)',
+      imgSrc:'images/tower14.png',
+      scale:objectScale,
+      speed: 2
+    }),
+    new Tower({
+      x:150,
+      y:150,
+      dmg:10,
+      color:'rgba(10, 100, 200, 0.5)',
+      imgSrc:'images/tower14.png',
+      scale:objectScale,
+      speed: 2
+    }),
+    new Tower({
+      x:100,
+      y:250,
+      dmg:10,
+      color:'rgba(10, 100, 200, 0.5)',
+      imgSrc:'images/tower14.png',
+      scale:objectScale,
+      speed: 2
     }),
   ];
   const paths = [
@@ -231,7 +263,7 @@
       x:100,
       y:0
     },
-  ]; // 길 그리기 좌
+  ]; // 길 그리기 좌표
   const spots = [
     new Spot({ x:50, y:0, color:'rgba(255, 155, 5, 0.2)', direction:'bottom' }),
     new Spot({
@@ -289,15 +321,18 @@
       direction:'left'
     }),
   ];
+  const missiles = [];
   const wave = [];
   let game = function(){};
   let wave1 = function(){};
+  let time = 0;
 
   //instance
   const render = new Render({
     ctx:ctx,
     scale:objectScale
   });
+
 
   // init
   init();
@@ -311,6 +346,7 @@
   }
 
   function gameLoop(){
+    time++;
     render.clearScreen();
     // render.drawImage()({imgSrc:'images/background3.png',x:0,y:0})();
     // render.drawAll(paths, render.drawSquare({ color:'yellow' }));
@@ -320,8 +356,12 @@
         .map((monster) =>{
           spots.map(spot => spot.track(monster));
           monster.moveTo(monster.direction).print(render.drawArc());
-          towers.map(tower => tower.fire(render.drawLine(tower,monster)));
+          towers.map(tower => tower.fire(render.drawLine(tower,monster),missiles, wave, Missile));
         });
+    missiles.filter(missile => missile.isMove).map(missile => {
+      missile.move(wave, missiles);
+      missile.print(render.drawSquare({ w:5, h:5 }));
+    });
   }
 
   function monsterFactory(length){
@@ -341,9 +381,4 @@
       }
     }
   }
-
-
-
-
-
 })(document, window.G);
