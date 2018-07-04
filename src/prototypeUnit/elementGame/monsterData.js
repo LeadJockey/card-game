@@ -17,7 +17,7 @@
       name:'green-knight',
       materialType:'armor',
       elementType:'tree',
-      img:'',
+      img:'https://dummyimage.com/300x460/fcb3fc/979ce8',
       maxHp:100,
       exp:10,
       skill:smash,

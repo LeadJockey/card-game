@@ -57,6 +57,13 @@
       this.ctx.fill();
     }
   };
+  Render.prototype.createImage = function(img, x, y, w, h){
+    return () =>{
+      const imgEl = new Image(w, h);
+      imgEl.src = img;
+      imgEl.onload = this.ctx.drawImage(imgEl, x, y);
+    }
+  };
   Render.prototype.createText = function(str, x, y, size, c,  align, font){
     return () =>{
       this.ctx.font = `${size || 10}px ${font || 'Comic Sans MS'}`;
