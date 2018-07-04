@@ -14,10 +14,10 @@
    **/
   const monsters = [
     {
-      name:'green-knight',
+      name:'beast-green',
       materialType:'armor',
       elementType:'tree',
-      img:'https://dummyimage.com/300x460/fcb3fc/979ce8',
+      img:'beast-green.png',
       maxHp:100,
       exp:10,
       skill:smash,

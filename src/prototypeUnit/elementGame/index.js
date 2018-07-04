@@ -10,7 +10,7 @@
   const ctx = doc.getElementById('canvas').getContext('2d');
   //instance
   const render = new Render({ctx:ctx,x:0,y:0,w:10,h:10});
-  const monster = new Monster(findMonster('green-knight'));
+  const monster = new Monster(findMonster('beast-green'));
   const user = new User({ name:'shawn', maxHp:100, exp:0 });
   //value
   const fps = 1000/60;

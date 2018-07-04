@@ -24,7 +24,7 @@
     return this.rendingList;
   };
   Render.prototype.draw = function(){
-    this.rendingList.map(render=>render());
+    this.rendingList.map(render => render());
   };
   Render.prototype.clearRect = function(x, y, w, h){
     return () =>{
@@ -47,24 +47,27 @@
       );
     }
   };
-  Render.prototype.createTriangle = function(x1,y1,x2,y2,x3,y3,c){
-    return ()=>{
+  Render.prototype.createTriangle = function(x1, y1, x2, y2, x3, y3, c){
+    return () =>{
       this.ctx.fillStyle = c;
       this.ctx.beginPath();
-      this.ctx.moveTo(x1,y1);
-      this.ctx.lineTo(x2,y2);
-      this.ctx.lineTo(x3,y3);
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
+      this.ctx.lineTo(x3, y3);
       this.ctx.fill();
     }
   };
-  Render.prototype.createImage = function(img, x, y, w, h){
+  Render.prototype.createImage = function(img, x, y){
+    const that = this;
     return () =>{
-      const imgEl = new Image(w, h);
-      imgEl.src = img;
-      imgEl.onload = this.ctx.drawImage(imgEl, x, y);
+      const imageObj = new Image();
+      imageObj.onload = function(){
+        that.ctx.drawImage(this, x, y);
+      };
+      imageObj.src = img;
     }
   };
-  Render.prototype.createText = function(str, x, y, size, c,  align, font){
+  Render.prototype.createText = function(str, x, y, size, c, align, font){
     return () =>{
       this.ctx.font = `${size || 10}px ${font || 'Comic Sans MS'}`;
       this.ctx.fillStyle = c || 'black';
@@ -72,11 +75,11 @@
       this.ctx.fillText(str || '', x || this.x, y || this.y);
     }
   };
-  Render.prototype.createLine = function(x1,y1,x2,y2,c){
-    return ()=>{
+  Render.prototype.createLine = function(x1, y1, x2, y2, c){
+    return () =>{
       this.ctx.beginPath();
-      this.ctx.moveTo(x1,y1);
-      this.ctx.lineTo(x2,y2);
+      this.ctx.moveTo(x1, y1);
+      this.ctx.lineTo(x2, y2);
       this.ctx.lineWidth = 0.5;
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
