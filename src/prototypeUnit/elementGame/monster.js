@@ -24,6 +24,7 @@
     return () =>{
       // render.createRect(30, 80, 300, 300, 'orange')(); // main img - frame
       render.createImage(this.img, 30, 80, 300, 300)(); // main img
+      render.createRect(200, 0, 160, 40, 'red')(); // hp
       render.createRect(hpX, 0, 160, 40, '#b6ea3d')(); // hp
       hpLines.map(eachHpX=>render.createLine(eachHpX,2,eachHpX,38,'black')());
       render.createRect(230, 0, 130, 30, 'white')(); //info
