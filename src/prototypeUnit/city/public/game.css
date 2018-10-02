@@ -1,0 +1,9 @@
+*{margin:0;padding:0}
+ul{list-style:none}
+body{background-color:#efefef}
+.game{padding-top:100px}
+.map{overflow:hidden;width:1000px;height:600px;margin:0 auto;background-color:#fff}
+.map > div{float:left}
+.box_filed{width:100px;height:100px;font-size:20px;line-height:100px;background-color:#b3d465;text-align:center;border:1px solid #333;box-sizing:border-box}
+.box_filed:hover{background-color:yellow}
+.box_house{background-color:orange}
